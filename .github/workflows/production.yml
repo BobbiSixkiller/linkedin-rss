@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [HyperV-2]
+    runs-on: [self-hosted]
     environment: production
     env:
       PORT: ${{ vars.PORT }}
