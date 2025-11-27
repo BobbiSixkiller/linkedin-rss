@@ -1,0 +1,33 @@
+name: Build and Deploy to Production
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: [HyperV]
+    environment: production
+    env:
+      PORT: ${{ vars.PORT }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Stop and remove old production containers
+        run: |
+          docker stop linkedin-rss || true
+          docker rm linkedin-rss || true
+
+      - name: Build and deploy production services
+        run: |
+          docker build -t linkedin-rss .
+          docker run -d --name linkedin-rss --restart unless-stopped -e PORT=${PORT} -p ${PORT}:${PORT} linkedin-rss
